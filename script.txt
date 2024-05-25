@@ -1,0 +1,877 @@
+Eden: Let's start by initializing an LLM
+
+and we'll use GPT-3.5 turbo
+
+with the temperature equals to zero,
+
+because we don't want any creative answers.
+
+We simply want the results that we're looking for
+
+from the search engine.
+
+Now depending how complex our agent is,
+
+how many tools it's using, what tasks does it need to solve,
+
+then we might want to consider other LLMs,
+
+maybe stronger LLMs.
+
+So for this use case,
+
+when we're going to have only one tool
+
+and we're going to ask only one specific question
+
+to get the LinkedIn URL,
+
+then GPT-3.5 will be more than enough.
+
+But usually production use cases are much more complex
+
+and we might want to use GPT-4 turbo,
+
+Gemini 1.5, Anthropic Sonnet, et cetera.
+
+It's usually also a matter of costs,
+
+so using those model would be much more expensive.
+
+Also, latency, but I'm getting ahead of myself.
+
+I have an entire video just dedicated
+
+for gen AI applications in production,
+
+so feel free to check it out once you finish this section.
+
+Alrighty, now we want to write the template
+
+that we're going to supply our prompt template.
+
+So it's going to be pretty simple.
+
+Given the full name of name of person,
+
+I want you to get a link to their LinkedIn profile page.
+
+Your answer should contain only URL.
+
+Now, the last part is very important
+
+because we don't want the LLM to return as fluff,
+
+so we don't want it to return something,
+
+the person's LinkedIn URL is blah blah.
+
+We want only the URL starting with HTTP.
+
+So providing this output indicator,
+
+and if you're not sure what's an output indicator,
+
+I'd highly recommend you check in the theory section
+
+where I talk about the composition of a prompt
+
+and what's a prompt made of.
+
+So this output indicator is a nice heuristic
+
+that is going to help us get only the URL as the answer.
+
+Now, if we want to make it more definitive,
+
+we want to be using length chain output parsers,
+
+which we're going to be covering in the following videos.
+
+So let's initialize the prompt template
+
+from the template we just wrote.
+
+So we're simply going to initialize this objects,
+
+and in the input variables,
+
+we're going to input name of person
+
+because that's the value
+
+that we're going to plug in dynamically.
+
+So far we didn't learn anything new,
+
+but now let's create a new variable
+
+and we call it tools_for_agent.
+
+And like you're guessing, it's going to have all the tools
+
+that our search agent is going to be using
+
+and this agent is going to only have one tool
+
+in its disposal.
+
+So you can see we initialized the length chain tool object
+
+and we supplied it with three algorithms.
+
+First the name, and this is the name that our agent
+
+is going to refer to this tool
+
+and it's going to be supplied to the reasoning engine
+
+and it's going to be displayed in the logs.
+
+So we want to put something meaningful in the name.
+
+Second is a function, and now I didn't provide anything,
+
+but this is actually the Python function
+
+that we want this tool to run.
+
+So we're going to see soon what's the implementation here,
+
+which is going to search for the LinkedIn profile page.
+
+And lastly, in line 21, you can see a description
+
+and the description is super, super important
+
+because that's how the LLM is going to determine
+
+whether to use this tool or not.
+
+So we want this description to be as concise
+
+and to have as much information so it won't be ambiguous.
+
+So the LLM would also always know which tool to use.
+
+So if our agent decides that it's time
+
+to invoke this tool according to its reasoning engine,
+
+then it'll simply run this function, the search function.
+
+Now, you can see that the LangChain tool object
+
+is actually quite simple.
+
+It's simply a logical entity that holds the information
+
+of a function that we want to run,
+
+a description which is going to help us when to run it,
+
+and of course the name of that tool.
+
+So nothing fancy right over here
+
+and it's pretty straightforward in my opinion.
+
+Of course when we initialize the tool,
+
+we can provide other arguments
+
+which are for more advanced use cases,
+
+but that's more than enough for now.
+
+Cool.
+
+So now we want to download something
+
+which is called the react_prompt.
+
+And for that, we're going to be writing hub.pull
+
+and we're going to plug in the string ("hwchase17/react").
+
+Now, Harrison Chase 17 is the username
+
+of Harrison Chase in the prompt tab.
+
+And Harrison Chase is the co-founder
+
+and creator of LangChain.
+
+And /react here is a prompt that Harrison Chase world,
+
+which is a super popular prompt used for ReAct prompting
+
+and it's actually going to be the reasoning engine
+
+of our agent.
+
+And you can see that the ReAct prompt
+
+is a prompt that is sent to the LLM.
+
+It will include our tool names and our tool descriptions
+
+and what we want our agent to do.
+
+And luckily for us,
+
+LangChain is going to be plugging in those values for us
+
+after we initialize the agent.
+
+So this is the beauty of it, a lot of boilerplate code
+
+and a lot of heavy lifting that we don't really need to do
+
+because it's already implemented by the LangChain framework.
+
+And this prompt over here is implementing the ReAct paper,
+
+that's why it's called the ReAct Prompt reasoning enacting,
+
+and you can check it in the theory section
+
+and it's also using something
+
+which is called the chain of thought.
+
+So this is also another famous prompting technique.
+
+Also, all of these in the theory section,
+
+feel free to check it out anytime.
+
+It's independent of the course.
+
+And this is going to be sent to the LLM.
+
+The LLM is going to take that alongside with something
+
+which is called a scratch pad,
+
+which is basically the history
+
+of what happened in the agent so far.
+
+And don't worry, we're going to be covered this.
+
+However, it's going to return us an answer
+
+and the answer may be a final answer
+
+that the agent finished his job and we have the answer
+
+or it's going to be which tools
+
+that we need to invoke now with which arguments.
+
+This is me giving you a teaser
+
+for the ReAct algorithm and LangChain implementation.
+
+And we're going to be diving deep into this
+
+in the following section.
+
+Don't worry if you don't understand this fully
+
+at the moment,
+
+but I promise you you will understand how it is working
+
+and what is this agent magic is.
+
+Anyways, this prompt is one
+
+of many prompts for a ReAct agent
+
+and you can check out the LangChain hub for more prompts
+
+and you can tweak it.
+
+An interesting fact, maybe history fact, about this prompt
+
+is that once in older versions of LangChain,
+
+this prompt was built in and we could have changed it.
+
+And the LangChain team has made significant work
+
+to make this more flexible
+
+and to allow us to provide a custom prompt that we want.
+
+So instead of providing this prompt,
+
+we can provide any other prompt that we want
+
+and this gives us a lot of flexibility of developers
+
+that we can tailor made into our use case.
+
+Anyways, now it's time to create our agent.
+
+So we have our prompt and we have our tools list.
+
+And now we want to use the function create_react_agent,
+
+which is going to accept our ReAct prompt that we just saw.
+
+It's going to accept our tools
+
+and it's going to accept our LLM.
+
+So we have here our agent which basically holds
+
+all the way we want to communicate with the LLM
+
+and which tools that we have,
+
+and then how to parse the output that we get from the LLM.
+
+But now we want to provide it also the runtime,
+
+so how to run in loops.
+
+And this is going to be our final agent.
+
+So we want to create something
+
+which is called an AgentExecutor.
+
+It's going to receive that agent.
+
+It's going to receive a list of tools
+
+because those are actually the tools that will be invoked.
+
+And we want to supply verbose equals true,
+
+so we'll see extensive log-in
+
+and we'll understand a bit more how this agent is working.
+
+So this AgentExecutor is the final thing
+
+that we're going to be running.
+
+This is the runtime of our agent.
+
+So I know this is pretty confusing,
+
+why do we need to create a ReAct agent
+
+and then create from it an AgentExecutor.
+
+But you can think about it as the create agent
+
+is going to be the recipe, what we're sending to the LLM
+
+and getting back to it and parsing it.
+
+But the AgentExecutor is going to be responsible
+
+for orchestrating all of these
+
+and in to be actually invoking those Python functions.
+
+Anyways, in the following section,
+
+we'll know exactly the differences
+
+because we'll be implementing both of them
+
+diving deep under the hood of this implementation.
+
+So the last thing we want to do is to invoke the agent.
+
+So I'm going to use the .invoke function like we saw before
+
+and the input is going to be
+
+the prompt template we wrote before
+
+which tells the agent to search
+
+for that person's LinkedIn URL.
+
+And we're going to plug in also the name we got
+
+with this lookup function.
+
+So that way we're passing dynamically the name
+
+and the agent's job is to find us.
+
+And lastly, what we want to do
+
+is simply to parse out the result.
+
+So we'll go and take the result in the output key
+
+and simply return it to the user.
+
+Okay, so let's have a recap of what we saw so far.
+
+This entire goal of this section
+
+is to create the ReAct agent with LangChain.
+
+So you can see it's pretty much straightforward.
+
+We basically just provided the list of tools,
+
+the prompt that it's going to be using,
+
+and to provide it an LLM and that's it.
+
+LangChain does everything for us.
+
+Now we don't need at the moment to understand
+
+what's happening under the hood and what's the logic
+
+that LangChain is actually implementing
+
+because we're going to see it very, very soon.
+
+Now it's time to go
+
+and implement the function of that agent.
+
+So we created the tool
+
+but we didn't really plug in a function.
+
+So we're now going to create the search function.
+
+So I'm going to create a new package
+
+and I want to call it tools.
+
+And in that package, I want to create a new Python file
+
+and let's call it tools as well,
+
+and it's going to hold all the list of tools
+
+that our agent is going to be using.
+
+And now we want to write a function
+
+that its entire purpose is to get the name
+
+and find its LinkedIn URL.
+
+And for that, we are going to be using a third party,
+
+which is called Tavily,
+
+and Tavily has a nice integration with LinkedIn.
+
+So Tavily is an API, a search API,
+
+which is highly optimized for generative AI workloads.
+
+So if we're using LLM agents like we're doing right now
+
+or building RAG application,
+
+retrieval augmentation generation,
+
+which we do in the second part of the course.
+
+So this search engine is highly optimized
+
+for those kind of applications.
+
+So it not only uses those search engines
+
+like Google and Bing,
+
+but it also has pre-built implemented logic
+
+of taking our questions and figuring out
+
+what is the best answer that we're looking for
+
+that would suit us for our generative AI application.
+
+So I think the best way is to show you by an example.
+
+And you can see it has a very generous free tier
+
+of a thousand API calls, a thousand searches per month,
+
+which is more than enough for this course
+
+and for your personal projects.
+
+So we don't need to put any credit card information
+
+and we also have email support in case we need it.
+
+So let's sign up and log in.
+
+I'm already signed up so I'm simply going to log in.
+
+And this is the main dashboard.
+
+We can see that we have here our API key
+
+that we can use programmatically.
+
+So what we want to do is to copy that
+
+and to place it in our .env file.
+
+And if I'll head up to the API playground
+
+on the left side over here,
+
+then we can see a simple example of how this API is working.
+
+So I'm going to put here my search query,
+
+which is my name Eden Marco LinkedIn.
+
+And I'm going to select General.
+
+And you can see we have here a bunch of advanced options
+
+and I'm going to make this API request.
+
+So we got an answer back
+
+and then we got all those LinkedIn profiles
+
+which are relevant to Eden Marco.
+
+Now, apparently, there are a bunch of Eden Marcos
+
+in the world
+
+and you can see that I'm the third one over here.
+
+So what I want to do is to refine a bit the query
+
+so it would turn only me.
+
+So I want to make it less ambiguous.
+
+And this is a concept that we use constantly in LLMs
+
+to making our request less ambiguous and more precise.
+
+And you can see that my LinkedIn URL is the first one,
+
+which is the correct one.
+
+So this is the API we're going to be using.
+
+And we see in the content that we are even given
+
+that other names Eden Marco exist.
+
+Now, if I want to search for NVIDIA's stock price,
+
+for example, we can see and send this request
+
+and we'll be getting a lot of relevant information
+
+about NVIDIA's stock price, and articles,
+
+and things that are highly optimized for LLM workloads.
+
+Let's go back to our .env file
+
+and let's paste in the Tavily API key.
+
+Now notice that I'm writing it in capital letters
+
+and it's super important to write it like that,
+
+because LangChain is going to be searching
+
+for this specific environment variable.
+
+All right, let's implement our tool functionality.
+
+So we want to write our search function.
+
+So for that, I'm going to use
+
+the Tavily search result object,
+
+which is built in by LangChain.
+
+And this is the object
+
+which is going to be using the Tavily API
+
+and it's going to be searching
+
+for the Tavily API key we just saw from before.
+
+So the function I'm going to be writing,
+
+it's called get_profile_url_tavily
+
+and it's going to search for LinkedIn
+
+or Twitter profile pages.
+
+It's going to receive a string as an argument.
+
+And it doesn't have to be a name to be honest.
+
+I just remembered it after I implemented.
+
+It can be any text, so it can be any search query.
+
+So can see why it's relevant when we invoke it.
+
+So let's initialize the Tavily client.
+
+So I'm simply going to create an object from this class
+
+and I'm going to call it search.
+
+Now, this search object is going to have one method
+
+which is called run.
+
+And when I invoke it with the text,
+
+and this time it's going to be the name,
+
+it's going to run the Tavily search
+
+like we saw before when we ran it manually.
+
+And then I'm simply wanting to take
+
+the first result that we get.
+
+Not only the first result, but the URL of that first result.
+
+So this is be simply parsing out the Tavily response.
+
+Cool, so now it's time to go back
+
+to our LinkedIn lookup agent
+
+and we want to tell the tool that this is the function
+
+that we want to run once it's chosen.
+
+So I'm going to import it.
+
+We can see at the top from tools.tools,
+
+we import this function.
+
+And that's pretty much it.
+
+Our agent is ready.
+
+I think it's time to test it.
+
+So let's run it.
+
+And right now I plugged it with Eden Marco.
+
+And let's see what's happening.
+
+So you can see right now we're entering the agent executor
+
+and now we can see the reasoning power of the LLM.
+
+So the LLM tells us I need to search
+
+for LinkedIn profile of Eden Marco.
+
+And now the action is going to be:
+
+Crawl Google 4 LinkedIn profile page.
+
+So I remind you of this is our tool's name.
+
+And the input for this action
+
+is Eden Marco LinkedIn profile.
+
+So what you see right now is the answer we got
+
+from the large language model
+
+and this is the reasoning process.
+
+So we sent a special prompt that is holding
+
+what we want the LLM agent to do
+
+and what tools does it have in its disposal.
+
+And as a result, we got this green thing over here.
+
+So this green response is the response we got from the LLM.
+
+Now you can see it has a special kind of formatting
+
+of action and action input.
+
+What LangChain is going to do,
+
+it's going to take this output of the LLM
+
+and parse out what tool we need to invoke
+
+and with which arguments.
+
+So this time we want to invoke
+
+the Crawl Google for LinkedIn profile page,
+
+even though it's not Google, it's Tavily,
+
+and we want to provide it with the input
+
+of Eden Marco LinkedIn profile.
+
+So LangChain is going to parse everything
+
+with some regular expressions for us.
+
+So this is very cool, and LangChain is implementing for us
+
+a lot of heavy lifting.
+
+Okay, after LangChain parses all of this information,
+
+it then even runs this function.
+
+So it's going to invoke this function that we wrote,
+
+the Python function.
+
+So after we ran the Python function that we just wrote,
+
+we can see that result in the blue text over here
+
+is what the tool return.
+
+And this is actually the answer,
+
+but we're not done over here
+
+because the agent is going to verify it.
+
+So now we start another iteration
+
+with the results we got from before.
+
+And now the agent says, I need to verify
+
+if this is the correct LinkedIn profile for Eden Marco.
+
+But now it's going to make sure by running the same tool
+
+with the same input a couple of more times
+
+simply to verify that this is the most relevant answers.
+
+So it's going to examine the output of every tool run
+
+and then it's going to decide what is the best URL
+
+that we need to have.
+
+This is the agent basically running in loops and doing it.
+
+And you can see that after a couple of iterations,
+
+we got a final answer and it's the LinkedIn URL,
+
+and this is the most relevant LinkedIn profile
+
+for Eden Marco.
+
+And this is actually the correct LinkedIn URL
+
+that we were looking for.
+
+Let's click it and let's see what did I get.
+
+And you can see that it's the correct LinkedIn profile
+
+and this is my profile.
+
+Now, a couple of things I want to note here.
+
+First of all, the result we got here,
+
+the correct LinkedIn URL work this time.
+
+But if you try and run it a couple of times,
+
+sometimes you'll get other results of other Eden Marco
+
+because there are a bunch of people with that name.
+
+In that case, we want to make this query less ambiguous.
+
+So we would like to add something like Eden Marco Udemy
+
+or something like that to make it
+
+less ambiguous and more precise
+
+so we know exactly who the search for.
+
+So if the name you're looking for is pretty common,
+
+then you might not get the result you want.
+
+So to mitigate this, we need to give simply more information
+
+that will be passed into the search agent.
+
+So this is a decent heuristic
+
+that we should use during this course.
+
+We can of course resolve this programmatically,
+
+but this is really out of scope.
+
+The second thing I want to mention is that you can see,
+
+even though we did ask for the agent
+
+to give us only the URL, we got a bunch of fluff.
+
+So we got the URL
+
+and then we got is the most relevant LinkedIn profile.
+
+So we don't really need that text.
+
+However, because our application will use an LLM
+
+to later process this response, this would work fine.
+
+So it doesn't matter if we get only the URL
+
+or we get the URL with fluff,
+
+replication is going to be robust enough
+
+to handle both of those use cases.
+
+
